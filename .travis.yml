@@ -1,0 +1,25 @@
+sude: required
+services:
+  - docker
+before_install:
+  - docker build -t mehtaanirudh/react-multi-docker -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true mehtaanirudh/react-multi-docker npm test
+
+after_success:
+  - docker build -t mehtaanirudh/multi-docker-client ./client
+  - docker build -t mehtaanirudh/multi-docker-nginx ./nginx 
+  - docker build -t mehtaanirudh/multi-docker-worker ./worker
+  - docker build -t mehtaanirudh/multi-docker-server ./server 
+
+  # Log in  
+
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+
+  #Push 
+
+  - docker push mehtaanirudh/multi-docker-client
+  - docker push mehtaanirudh/multi-docker-nginx 
+  - docker push mehtaanirudh/multi-docker-worker
+  - docker push mehtaanirudh/multi-docker-server
